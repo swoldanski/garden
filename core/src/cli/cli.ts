@@ -238,7 +238,13 @@ ${renderCommands(commands)}
       loggerType = "quiet"
     }
 
-    const logger = Logger.initialize({ level, type: loggerType, useEmoji: emoji, showTimestamps })
+    const logger = Logger.initialize({
+      level,
+      storeEntries: loggerType === "fancy",
+      type: loggerType,
+      useEmoji: emoji,
+      showTimestamps,
+    })
 
     // Currently we initialise empty placeholder entries and pass those to the
     // framework as opposed to the logger itself. This is to give better control over where on
@@ -608,6 +614,7 @@ ${renderCommands(commands)}
       logger = Logger.initialize({
         level: LogLevel.info,
         type: "basic",
+        storeEntries: false,
       })
     }
 

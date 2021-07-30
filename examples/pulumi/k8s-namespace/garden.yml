@@ -1,0 +1,6 @@
+kind: Module
+type: pulumi
+name: k8s-namespace
+cacheStatus: true
+pulumiVariables:
+  pulumi-k8s:namespace: some-ns-pulumi-variables-override

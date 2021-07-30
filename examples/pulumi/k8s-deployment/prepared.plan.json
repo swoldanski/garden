@@ -1,0 +1,621 @@
+{
+    "manifest": {
+        "time": "2022-02-27T20:45:39.618404+01:00",
+        "magic": "716f0bdad25b3b8e2145d2be034ba3ea4bdfb2c5330ba1d595d227e45289fbfd",
+        "version": "v3.24.1"
+    },
+    "config": {
+        "kubernetes:context": "docker-desktop",
+        "pulumi-k8s:appName": "api-varfile2-override",
+        "pulumi-k8s:isMinikube": "true",
+        "pulumi-k8s:namespace": "some-ns-pulumi-variables-override"
+    },
+    "resourcePlans": {
+        "urn:pulumi:pulumi-k8s::pulumi-k8s::kubernetes:apps/v1:Deployment::api-varfile2-override": {
+            "goal": {
+                "type": "kubernetes:apps/v1:Deployment",
+                "name": "api-varfile2-override",
+                "custom": true,
+                "checkedInputs": {
+                    "apiVersion": "apps/v1",
+                    "kind": "Deployment",
+                    "metadata": {
+                        "annotations": {
+                            "pulumi.com/autonamed": "true"
+                        },
+                        "labels": {
+                            "app": "api-varfile2-override",
+                            "app.kubernetes.io/managed-by": "pulumi"
+                        },
+                        "name": "api-varfile2-override-8pulu5e0",
+                        "namespace": "some-ns-pulumi-variables-override-ftkf8ux5"
+                    },
+                    "spec": {
+                        "replicas": 1,
+                        "selector": {
+                            "matchLabels": {
+                                "app": "api-varfile2-override"
+                            }
+                        },
+                        "template": {
+                            "metadata": {
+                                "labels": {
+                                    "app": "api-varfile2-override"
+                                }
+                            },
+                            "spec": {
+                                "containers": [
+                                    {
+                                        "image": "nginx",
+                                        "name": "api-varfile2-override"
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                },
+                "inputDiff": {},
+                "outputDiff": {},
+                "parent": "urn:pulumi:pulumi-k8s::pulumi-k8s::pulumi:pulumi:Stack::pulumi-k8s-pulumi-k8s",
+                "protect": false,
+                "dependencies": [
+                    "urn:pulumi:pulumi-k8s::pulumi-k8s::kubernetes:core/v1:Namespace::some-ns-pulumi-variables-override"
+                ],
+                "provider": "urn:pulumi:pulumi-k8s::pulumi-k8s::pulumi:providers:kubernetes::default_3_16_0::70c9d358-4f5b-4b3f-8496-c1a9f764149f",
+                "propertyDependencies": {
+                    "apiVersion": null,
+                    "kind": null,
+                    "metadata": [
+                        "urn:pulumi:pulumi-k8s::pulumi-k8s::kubernetes:core/v1:Namespace::some-ns-pulumi-variables-override"
+                    ],
+                    "spec": null
+                },
+                "aliases": [
+                    "urn:pulumi:pulumi-k8s::pulumi-k8s::kubernetes:apps/v1beta1:Deployment::api-varfile2-override",
+                    "urn:pulumi:pulumi-k8s::pulumi-k8s::kubernetes:apps/v1beta2:Deployment::api-varfile2-override",
+                    "urn:pulumi:pulumi-k8s::pulumi-k8s::kubernetes:extensions/v1beta1:Deployment::api-varfile2-override"
+                ],
+                "customTimeouts": {}
+            },
+            "steps": [
+                "same"
+            ],
+            "state": {
+                "__initialApiVersion": "apps/v1",
+                "__inputs": {
+                    "apiVersion": "apps/v1",
+                    "kind": "Deployment",
+                    "metadata": {
+                        "annotations": {
+                            "pulumi.com/autonamed": "true"
+                        },
+                        "labels": {
+                            "app": "api-varfile2-override",
+                            "app.kubernetes.io/managed-by": "pulumi"
+                        },
+                        "name": "api-varfile2-override-8pulu5e0",
+                        "namespace": "some-ns-pulumi-variables-override-ftkf8ux5"
+                    },
+                    "spec": {
+                        "replicas": 1,
+                        "selector": {
+                            "matchLabels": {
+                                "app": "api-varfile2-override"
+                            }
+                        },
+                        "template": {
+                            "metadata": {
+                                "labels": {
+                                    "app": "api-varfile2-override"
+                                }
+                            },
+                            "spec": {
+                                "containers": [
+                                    {
+                                        "image": "nginx",
+                                        "name": "api-varfile2-override"
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                },
+                "apiVersion": "apps/v1",
+                "kind": "Deployment",
+                "metadata": {
+                    "annotations": {
+                        "deployment.kubernetes.io/revision": "1",
+                        "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"apps/v1\",\"kind\":\"Deployment\",\"metadata\":{\"annotations\":{\"pulumi.com/autonamed\":\"true\"},\"labels\":{\"app\":\"api-varfile2-override\",\"app.kubernetes.io/managed-by\":\"pulumi\"},\"name\":\"api-varfile2-override-8pulu5e0\",\"namespace\":\"some-ns-pulumi-variables-override-ftkf8ux5\"},\"spec\":{\"replicas\":1,\"selector\":{\"matchLabels\":{\"app\":\"api-varfile2-override\"}},\"template\":{\"metadata\":{\"labels\":{\"app\":\"api-varfile2-override\"}},\"spec\":{\"containers\":[{\"image\":\"nginx\",\"name\":\"api-varfile2-override\"}]}}}}\n",
+                        "pulumi.com/autonamed": "true"
+                    },
+                    "creationTimestamp": "2022-02-27T18:27:11Z",
+                    "generation": 1,
+                    "labels": {
+                        "app": "api-varfile2-override",
+                        "app.kubernetes.io/managed-by": "pulumi"
+                    },
+                    "managedFields": [
+                        {
+                            "apiVersion": "apps/v1",
+                            "fieldsType": "FieldsV1",
+                            "fieldsV1": {
+                                "f:metadata": {
+                                    "f:annotations": {
+                                        ".": {},
+                                        "f:kubectl.kubernetes.io/last-applied-configuration": {},
+                                        "f:pulumi.com/autonamed": {}
+                                    },
+                                    "f:labels": {
+                                        ".": {},
+                                        "f:app": {},
+                                        "f:app.kubernetes.io/managed-by": {}
+                                    }
+                                },
+                                "f:spec": {
+                                    "f:progressDeadlineSeconds": {},
+                                    "f:replicas": {},
+                                    "f:revisionHistoryLimit": {},
+                                    "f:selector": {},
+                                    "f:strategy": {
+                                        "f:rollingUpdate": {
+                                            ".": {},
+                                            "f:maxSurge": {},
+                                            "f:maxUnavailable": {}
+                                        },
+                                        "f:type": {}
+                                    },
+                                    "f:template": {
+                                        "f:metadata": {
+                                            "f:labels": {
+                                                ".": {},
+                                                "f:app": {}
+                                            }
+                                        },
+                                        "f:spec": {
+                                            "f:containers": {
+                                                "k:{\"name\":\"api-varfile2-override\"}": {
+                                                    ".": {},
+                                                    "f:image": {},
+                                                    "f:imagePullPolicy": {},
+                                                    "f:name": {},
+                                                    "f:resources": {},
+                                                    "f:terminationMessagePath": {},
+                                                    "f:terminationMessagePolicy": {}
+                                                }
+                                            },
+                                            "f:dnsPolicy": {},
+                                            "f:restartPolicy": {},
+                                            "f:schedulerName": {},
+                                            "f:securityContext": {},
+                                            "f:terminationGracePeriodSeconds": {}
+                                        }
+                                    }
+                                }
+                            },
+                            "manager": "pulumi-resource-kubernetes",
+                            "operation": "Update",
+                            "time": "2022-02-27T18:27:11Z"
+                        },
+                        {
+                            "apiVersion": "apps/v1",
+                            "fieldsType": "FieldsV1",
+                            "fieldsV1": {
+                                "f:metadata": {
+                                    "f:annotations": {
+                                        "f:deployment.kubernetes.io/revision": {}
+                                    }
+                                },
+                                "f:status": {
+                                    "f:availableReplicas": {},
+                                    "f:conditions": {
+                                        ".": {},
+                                        "k:{\"type\":\"Available\"}": {
+                                            ".": {},
+                                            "f:lastTransitionTime": {},
+                                            "f:lastUpdateTime": {},
+                                            "f:message": {},
+                                            "f:reason": {},
+                                            "f:status": {},
+                                            "f:type": {}
+                                        },
+                                        "k:{\"type\":\"Progressing\"}": {
+                                            ".": {},
+                                            "f:lastTransitionTime": {},
+                                            "f:lastUpdateTime": {},
+                                            "f:message": {},
+                                            "f:reason": {},
+                                            "f:status": {},
+                                            "f:type": {}
+                                        }
+                                    },
+                                    "f:observedGeneration": {},
+                                    "f:readyReplicas": {},
+                                    "f:replicas": {},
+                                    "f:updatedReplicas": {}
+                                }
+                            },
+                            "manager": "kube-controller-manager",
+                            "operation": "Update",
+                            "subresource": "status",
+                            "time": "2022-02-27T18:27:14Z"
+                        }
+                    ],
+                    "name": "api-varfile2-override-8pulu5e0",
+                    "namespace": "some-ns-pulumi-variables-override-ftkf8ux5",
+                    "resourceVersion": "257924",
+                    "uid": "5c366f0a-e90f-416c-8a14-459bb8abf6a7"
+                },
+                "spec": {
+                    "progressDeadlineSeconds": 600,
+                    "replicas": 1,
+                    "revisionHistoryLimit": 10,
+                    "selector": {
+                        "matchLabels": {
+                            "app": "api-varfile2-override"
+                        }
+                    },
+                    "strategy": {
+                        "rollingUpdate": {
+                            "maxSurge": "25%",
+                            "maxUnavailable": "25%"
+                        },
+                        "type": "RollingUpdate"
+                    },
+                    "template": {
+                        "metadata": {
+                            "labels": {
+                                "app": "api-varfile2-override"
+                            }
+                        },
+                        "spec": {
+                            "containers": [
+                                {
+                                    "image": "nginx",
+                                    "imagePullPolicy": "Always",
+                                    "name": "api-varfile2-override",
+                                    "resources": {},
+                                    "terminationMessagePath": "/dev/termination-log",
+                                    "terminationMessagePolicy": "File"
+                                }
+                            ],
+                            "dnsPolicy": "ClusterFirst",
+                            "restartPolicy": "Always",
+                            "schedulerName": "default-scheduler",
+                            "securityContext": {},
+                            "terminationGracePeriodSeconds": 30
+                        }
+                    }
+                },
+                "status": {
+                    "availableReplicas": 1,
+                    "conditions": [
+                        {
+                            "lastTransitionTime": "2022-02-27T18:27:14Z",
+                            "lastUpdateTime": "2022-02-27T18:27:14Z",
+                            "message": "Deployment has minimum availability.",
+                            "reason": "MinimumReplicasAvailable",
+                            "status": "True",
+                            "type": "Available"
+                        },
+                        {
+                            "lastTransitionTime": "2022-02-27T18:27:11Z",
+                            "lastUpdateTime": "2022-02-27T18:27:14Z",
+                            "message": "ReplicaSet \"api-varfile2-override-8pulu5e0-5d9956fd6\" has successfully progressed.",
+                            "reason": "NewReplicaSetAvailable",
+                            "status": "True",
+                            "type": "Progressing"
+                        }
+                    ],
+                    "observedGeneration": 1,
+                    "readyReplicas": 1,
+                    "replicas": 1,
+                    "updatedReplicas": 1
+                }
+            }
+        },
+        "urn:pulumi:pulumi-k8s::pulumi-k8s::kubernetes:core/v1:Namespace::some-ns-pulumi-variables-override": {
+            "goal": {
+                "type": "kubernetes:core/v1:Namespace",
+                "name": "some-ns-pulumi-variables-override",
+                "custom": true,
+                "checkedInputs": {
+                    "apiVersion": "v1",
+                    "kind": "Namespace",
+                    "metadata": {
+                        "annotations": {
+                            "pulumi.com/autonamed": "true"
+                        },
+                        "labels": {
+                            "app.kubernetes.io/managed-by": "pulumi"
+                        },
+                        "name": "some-ns-pulumi-variables-override-ftkf8ux5"
+                    }
+                },
+                "inputDiff": {},
+                "outputDiff": {},
+                "parent": "urn:pulumi:pulumi-k8s::pulumi-k8s::pulumi:pulumi:Stack::pulumi-k8s-pulumi-k8s",
+                "protect": false,
+                "provider": "urn:pulumi:pulumi-k8s::pulumi-k8s::pulumi:providers:kubernetes::default_3_16_0::70c9d358-4f5b-4b3f-8496-c1a9f764149f",
+                "propertyDependencies": {
+                    "apiVersion": null,
+                    "kind": null
+                },
+                "customTimeouts": {}
+            },
+            "steps": [
+                "same"
+            ],
+            "state": {
+                "__initialApiVersion": "v1",
+                "__inputs": {
+                    "apiVersion": "v1",
+                    "kind": "Namespace",
+                    "metadata": {
+                        "annotations": {
+                            "pulumi.com/autonamed": "true"
+                        },
+                        "labels": {
+                            "app.kubernetes.io/managed-by": "pulumi"
+                        },
+                        "name": "some-ns-pulumi-variables-override-ftkf8ux5"
+                    }
+                },
+                "apiVersion": "v1",
+                "kind": "Namespace",
+                "metadata": {
+                    "annotations": {
+                        "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"v1\",\"kind\":\"Namespace\",\"metadata\":{\"annotations\":{\"pulumi.com/autonamed\":\"true\"},\"labels\":{\"app.kubernetes.io/managed-by\":\"pulumi\"},\"name\":\"some-ns-pulumi-variables-override-ftkf8ux5\"}}\n",
+                        "pulumi.com/autonamed": "true"
+                    },
+                    "creationTimestamp": "2022-02-27T18:27:10Z",
+                    "labels": {
+                        "app.kubernetes.io/managed-by": "pulumi",
+                        "kubernetes.io/metadata.name": "some-ns-pulumi-variables-override-ftkf8ux5"
+                    },
+                    "managedFields": [
+                        {
+                            "apiVersion": "v1",
+                            "fieldsType": "FieldsV1",
+                            "fieldsV1": {
+                                "f:metadata": {
+                                    "f:annotations": {
+                                        ".": {},
+                                        "f:kubectl.kubernetes.io/last-applied-configuration": {},
+                                        "f:pulumi.com/autonamed": {}
+                                    },
+                                    "f:labels": {
+                                        ".": {},
+                                        "f:app.kubernetes.io/managed-by": {},
+                                        "f:kubernetes.io/metadata.name": {}
+                                    }
+                                }
+                            },
+                            "manager": "pulumi-resource-kubernetes",
+                            "operation": "Update",
+                            "time": "2022-02-27T18:27:10Z"
+                        }
+                    ],
+                    "name": "some-ns-pulumi-variables-override-ftkf8ux5",
+                    "resourceVersion": "257896",
+                    "uid": "b098dcfa-158b-4923-9b3e-fbdf5ad4a311"
+                },
+                "spec": {
+                    "finalizers": [
+                        "kubernetes"
+                    ]
+                },
+                "status": {
+                    "phase": "Active"
+                }
+            }
+        },
+        "urn:pulumi:pulumi-k8s::pulumi-k8s::kubernetes:core/v1:Service::api-varfile2-override": {
+            "goal": {
+                "type": "kubernetes:core/v1:Service",
+                "name": "api-varfile2-override",
+                "custom": true,
+                "checkedInputs": {
+                    "apiVersion": "v1",
+                    "kind": "Service",
+                    "metadata": {
+                        "annotations": {
+                            "pulumi.com/autonamed": "true"
+                        },
+                        "labels": {
+                            "app": "api-varfile2-override",
+                            "app.kubernetes.io/managed-by": "pulumi"
+                        },
+                        "name": "api-varfile2-override-ccx9d9n1",
+                        "namespace": "some-ns-pulumi-variables-override-ftkf8ux5"
+                    },
+                    "spec": {
+                        "ports": [
+                            {
+                                "port": 80,
+                                "protocol": "TCP",
+                                "targetPort": 80
+                            }
+                        ],
+                        "selector": {
+                            "app": "api-varfile2-override"
+                        },
+                        "type": "ClusterIP"
+                    }
+                },
+                "inputDiff": {},
+                "outputDiff": {},
+                "parent": "urn:pulumi:pulumi-k8s::pulumi-k8s::pulumi:pulumi:Stack::pulumi-k8s-pulumi-k8s",
+                "protect": false,
+                "dependencies": [
+                    "urn:pulumi:pulumi-k8s::pulumi-k8s::kubernetes:apps/v1:Deployment::api-varfile2-override",
+                    "urn:pulumi:pulumi-k8s::pulumi-k8s::kubernetes:core/v1:Namespace::some-ns-pulumi-variables-override"
+                ],
+                "provider": "urn:pulumi:pulumi-k8s::pulumi-k8s::pulumi:providers:kubernetes::default_3_16_0::70c9d358-4f5b-4b3f-8496-c1a9f764149f",
+                "propertyDependencies": {
+                    "apiVersion": null,
+                    "kind": null,
+                    "metadata": [
+                        "urn:pulumi:pulumi-k8s::pulumi-k8s::kubernetes:apps/v1:Deployment::api-varfile2-override",
+                        "urn:pulumi:pulumi-k8s::pulumi-k8s::kubernetes:core/v1:Namespace::some-ns-pulumi-variables-override"
+                    ],
+                    "spec": null
+                },
+                "customTimeouts": {}
+            },
+            "steps": [
+                "same"
+            ],
+            "state": {
+                "__initialApiVersion": "v1",
+                "__inputs": {
+                    "apiVersion": "v1",
+                    "kind": "Service",
+                    "metadata": {
+                        "annotations": {
+                            "pulumi.com/autonamed": "true"
+                        },
+                        "labels": {
+                            "app": "api-varfile2-override",
+                            "app.kubernetes.io/managed-by": "pulumi"
+                        },
+                        "name": "api-varfile2-override-ccx9d9n1",
+                        "namespace": "some-ns-pulumi-variables-override-ftkf8ux5"
+                    },
+                    "spec": {
+                        "ports": [
+                            {
+                                "port": 80,
+                                "protocol": "TCP",
+                                "targetPort": 80
+                            }
+                        ],
+                        "selector": {
+                            "app": "api-varfile2-override"
+                        },
+                        "type": "ClusterIP"
+                    }
+                },
+                "apiVersion": "v1",
+                "kind": "Service",
+                "metadata": {
+                    "annotations": {
+                        "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"v1\",\"kind\":\"Service\",\"metadata\":{\"annotations\":{\"pulumi.com/autonamed\":\"true\"},\"labels\":{\"app\":\"api-varfile2-override\",\"app.kubernetes.io/managed-by\":\"pulumi\"},\"name\":\"api-varfile2-override-ccx9d9n1\",\"namespace\":\"some-ns-pulumi-variables-override-ftkf8ux5\"},\"spec\":{\"ports\":[{\"port\":80,\"protocol\":\"TCP\",\"targetPort\":80}],\"selector\":{\"app\":\"api-varfile2-override\"},\"type\":\"ClusterIP\"}}\n",
+                        "pulumi.com/autonamed": "true"
+                    },
+                    "creationTimestamp": "2022-02-27T18:27:15Z",
+                    "labels": {
+                        "app": "api-varfile2-override",
+                        "app.kubernetes.io/managed-by": "pulumi"
+                    },
+                    "managedFields": [
+                        {
+                            "apiVersion": "v1",
+                            "fieldsType": "FieldsV1",
+                            "fieldsV1": {
+                                "f:metadata": {
+                                    "f:annotations": {
+                                        ".": {},
+                                        "f:kubectl.kubernetes.io/last-applied-configuration": {},
+                                        "f:pulumi.com/autonamed": {}
+                                    },
+                                    "f:labels": {
+                                        ".": {},
+                                        "f:app": {},
+                                        "f:app.kubernetes.io/managed-by": {}
+                                    }
+                                },
+                                "f:spec": {
+                                    "f:internalTrafficPolicy": {},
+                                    "f:ports": {
+                                        ".": {},
+                                        "k:{\"port\":80,\"protocol\":\"TCP\"}": {
+                                            ".": {},
+                                            "f:port": {},
+                                            "f:protocol": {},
+                                            "f:targetPort": {}
+                                        }
+                                    },
+                                    "f:selector": {},
+                                    "f:sessionAffinity": {},
+                                    "f:type": {}
+                                }
+                            },
+                            "manager": "pulumi-resource-kubernetes",
+                            "operation": "Update",
+                            "time": "2022-02-27T18:27:15Z"
+                        }
+                    ],
+                    "name": "api-varfile2-override-ccx9d9n1",
+                    "namespace": "some-ns-pulumi-variables-override-ftkf8ux5",
+                    "resourceVersion": "257927",
+                    "uid": "435ab104-df50-431f-bb01-f7870ca7b377"
+                },
+                "spec": {
+                    "clusterIP": "10.98.39.150",
+                    "clusterIPs": [
+                        "10.98.39.150"
+                    ],
+                    "internalTrafficPolicy": "Cluster",
+                    "ipFamilies": [
+                        "IPv4"
+                    ],
+                    "ipFamilyPolicy": "SingleStack",
+                    "ports": [
+                        {
+                            "port": 80,
+                            "protocol": "TCP",
+                            "targetPort": 80
+                        }
+                    ],
+                    "selector": {
+                        "app": "api-varfile2-override"
+                    },
+                    "sessionAffinity": "None",
+                    "type": "ClusterIP"
+                },
+                "status": {
+                    "loadBalancer": {}
+                }
+            }
+        },
+        "urn:pulumi:pulumi-k8s::pulumi-k8s::pulumi:providers:kubernetes::default_3_16_0": {
+            "goal": {
+                "type": "pulumi:providers:kubernetes",
+                "name": "default_3_16_0",
+                "custom": true,
+                "checkedInputs": {
+                    "context": "docker-desktop",
+                    "version": "3.16.0"
+                },
+                "inputDiff": {},
+                "outputDiff": {},
+                "protect": false,
+                "customTimeouts": {}
+            },
+            "steps": [
+                "same"
+            ],
+            "state": {
+                "context": "docker-desktop",
+                "version": "3.16.0"
+            }
+        },
+        "urn:pulumi:pulumi-k8s::pulumi-k8s::pulumi:pulumi:Stack::pulumi-k8s-pulumi-k8s": {
+            "goal": {
+                "type": "pulumi:pulumi:Stack",
+                "name": "pulumi-k8s-pulumi-k8s",
+                "custom": false,
+                "inputDiff": {},
+                "outputDiff": {},
+                "protect": false,
+                "customTimeouts": {}
+            },
+            "steps": [
+                "same"
+            ],
+            "state": {
+                "namespace": "some-ns-pulumi-variables-override-ftkf8ux5"
+            }
+        }
+    }
+}

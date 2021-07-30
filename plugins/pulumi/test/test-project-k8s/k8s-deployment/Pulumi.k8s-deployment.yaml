@@ -1,0 +1,5 @@
+config:
+  kubernetes:context: docker-desktop
+  pulumi-k8s:appName: api
+  pulumi-k8s:isMinikube: "true"
+  pulumi-k8s:namespace: some-ns

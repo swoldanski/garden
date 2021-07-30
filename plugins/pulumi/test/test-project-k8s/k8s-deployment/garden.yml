@@ -1,0 +1,10 @@
+kind: Module
+type: pulumi
+name: k8s-deployment
+description: Creates a Deployment and a Service
+pulumiVarfiles: [varfile1.yaml, varfile2.yaml]
+pulumiVariables:
+  # We use the k8s provider's default namespace (since it already exists)
+  pulumi-k8s:namespace: pulumi-test-default
+  pulumi-k8s:orgName: thsig # <--- replace with Garden org
+  pulumi-k8s:appName: api-pulumi-variables-override
