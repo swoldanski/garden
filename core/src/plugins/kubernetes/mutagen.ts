@@ -314,6 +314,7 @@ function checkMutagen(log: LogEntry) {
         const { logSection: section } = activeSync
 
         for (const problem of problems) {
+          log.info({ symbol: "warning", section, msg: chalk.yellow(problem) })
           if (!activeSync.lastProblems.includes(problem)) {
             log.warn({ symbol: "warning", section, msg: chalk.yellow(problem) })
           }

@@ -238,7 +238,7 @@ export async function processModules({
           graph = await garden.getConfigGraph({ log, emit: false })
           log.info("")
           log.info({ emoji: "hammer", msg: chalk.yellow(`Build requested for ${chalk.white(event.moduleName)}`) })
-          const tasks = await cloudEventHandlers.buildRequested({ ...params, request: event })
+          const tasks = await cloudEventHandlers.buildRequested({ ...params, request: event, graph })
           await garden.processTasks(tasks)
         } catch (err) {
           log.error(err.message)
@@ -264,7 +264,12 @@ export async function processModules({
           const msg = `${prefix} requested for ${chalk.white(event.serviceName)}`
           log.info("")
           log.info({ emoji, msg: chalk.yellow(msg) })
-          const deployTask = await cloudEventHandlers.deployRequested({ ...params, request: event, sessionSettings })
+          const deployTask = await cloudEventHandlers.deployRequested({
+            ...params,
+            request: event,
+            sessionSettings,
+            graph,
+          })
           await garden.processTasks([deployTask])
         } catch (err) {
           log.error(err.message)
@@ -281,7 +286,12 @@ export async function processModules({
           const msg = chalk.yellow(`Tests requested for ${chalk.white(event.moduleName)}${suffix}`)
           log.info("")
           log.info({ emoji: "thermometer", msg })
-          const testTasks = await cloudEventHandlers.testRequested({ ...params, request: event, sessionSettings })
+          const testTasks = await cloudEventHandlers.testRequested({
+            ...params,
+            request: event,
+            sessionSettings,
+            graph,
+          })
           await garden.processTasks(testTasks)
         } catch (err) {
           log.error(err.message)
