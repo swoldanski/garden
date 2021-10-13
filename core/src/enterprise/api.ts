@@ -6,6 +6,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
+import WebSocket from "ws"
 import { IncomingHttpHeaders } from "http"
 
 import { got, GotHeaders, GotHttpError, GotJsonOptions } from "../util/http"
@@ -415,6 +416,14 @@ export class EnterpriseApi {
       ...res.body,
       headers: res.headers,
     }
+  }
+
+  async wsConnect(sessionId: string) {
+    const authToken = await EnterpriseApi.getAuthToken(this.log)
+    const tokenParam = !!gardenEnv.GARDEN_AUTH_TOKEN ? "ciToken" : "accessToken"
+    const hostname = this.domain.split("https://")[1]
+    const ws = new WebSocket(`wss://${hostname}/ws/cli?${tokenParam}=${authToken}&sessionId=${sessionId}`)
+    return ws
   }
 
   async get<T>(path: string, opts: ApiFetchOptions = {}) {

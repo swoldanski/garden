@@ -94,7 +94,7 @@ type LogsTagOrFilter = LogsTagAndFilter[]
 /**
  * Skip empty entries.
  */
-function skipEntry(entry: ServiceLogEntry) {
+export function skipEntry(entry: ServiceLogEntry) {
   const validDate = entry.timestamp && entry.timestamp instanceof Date && !isNaN(entry.timestamp.getTime())
   return !entry.msg && !validDate
 }
