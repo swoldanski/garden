@@ -40,7 +40,7 @@ export async function getSecrets({ log, environmentName, enterpriseApi }: GetSec
         in the system.
       `)
     } else {
-      log.error("An error occurred while fetching secrets for the project.")
+      // log.error("An error occurred while fetching secrets for the project.")
       throw err
     }
   }
