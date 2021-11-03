@@ -53,6 +53,7 @@ import { skipEntry } from "./logs"
 import { EventBus } from "../events"
 
 const ansiBannerPath = join(STATIC_DIR, "garden-banner-2.txt")
+const useLocalWsServer = true
 
 const devArgs = {
   services: new StringsParameter({
@@ -128,7 +129,7 @@ export class DevCommand extends Command<DevCommandArgs, DevCommandOpts> {
     log.info(chalk.gray.italic(`Good ${getGreetingTime()}! Let's get your environment wired up...`))
     log.info("")
 
-    this.server = await startServer({ log: footerLog })
+    this.server = await startServer({ log: footerLog, port: 9700 })
     const sessionSettings = prepareSessionSettings({
       deployServiceNames: args.services || ["*"],
       testModuleNames: opts["skip-tests"] ? [] : ["*"],
@@ -189,7 +190,7 @@ export class DevCommand extends Command<DevCommandArgs, DevCommandOpts> {
 
     if (ws) {
       const actions = await garden.getActionRouter()
-      startLogStream({ ws, graph, log, actions })
+      startLogStream({ ws, graph, log, actions, events: garden.events })
         .then(() => {
           log.silly(`Started log stream`)
         })
@@ -251,15 +252,17 @@ async function startLogStream({
   graph,
   log,
   actions,
+  events,
 }: {
   ws: WebSocket
   graph: ConfigGraph
   log: LogEntry
   actions: ActionRouter
+  events: EventBus
 }) {
   const services = graph.getServices()
   const stream = new Stream<ServiceLogEntry>()
-  const events = new PluginEventBroker()
+  const pluginEvents = new PluginEventBroker()
 
   void stream.forEach((entry) => {
     // Skip empty entries
@@ -267,16 +270,26 @@ async function startLogStream({
       return
     }
 
-    ws.readyState === 1 &&
-      ws.send(
-        JSON.stringify({
-          type: "serviceLog",
-          name: "serviceLog",
-          message: entry.msg,
-          serviceName: entry.serviceName,
-          timestamp: entry.timestamp?.getTime(),
-        })
-      )
+    if (useLocalWsServer) {
+      events.emit("serviceLog", {
+        type: "serviceLog",
+        name: "serviceLog",
+        message: entry.msg,
+        serviceName: entry.serviceName,
+        timestamp: entry.timestamp?.getTime(),
+      })
+    } else {
+      ws.readyState === 1 &&
+        ws.send(
+          JSON.stringify({
+            type: "serviceLog",
+            name: "serviceLog",
+            message: entry.msg,
+            serviceName: entry.serviceName,
+            timestamp: entry.timestamp?.getTime(),
+          })
+        )
+    }
   })
 
   await Bluebird.map(services, async (service: GardenService<any>) => {
@@ -287,7 +300,7 @@ async function startLogStream({
       stream,
       follow: true,
       since: "10s",
-      events,
+      events: pluginEvents,
     })
   })
 }
@@ -317,7 +330,7 @@ async function wsConnect(garden: Garden) {
   }
 
   garden.events.onAny((name, payload) => {
-    if (ws && ws.readyState === 1) {
+    if (ws && ws.readyState === 1 && !useLocalWsServer) {
       ws.send(JSON.stringify({ type: "event", name, ...payload }))
     }
   })

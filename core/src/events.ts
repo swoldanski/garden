@@ -303,6 +303,13 @@ export interface Events extends LoggerEvents {
     moduleName: string
     test: boolean
   }
+  serviceLog: {
+    type: string
+    name: string
+    message: string
+    serviceName: string
+    timestamp?: number
+  }
 }
 
 export type EventName = keyof Events
@@ -354,4 +361,5 @@ export const pipedEventNames: EventName[] = [
   "setBuildOnWatch",
   "setDeployOnWatch",
   "setTestOnWatch",
+  "serviceLog",
 ]

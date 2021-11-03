@@ -37,6 +37,7 @@ import { LogLevel } from "../logger/logger"
 // We may no longer embed servers in watch processes from 0.13 onwards.
 export const defaultWatchServerPort = 9777
 const notReadyMessage = "Waiting for Garden instance to initialize"
+const useLocalWsServer = true
 
 /**
  * Start an HTTP server that exposes commands and events for the given Garden instance.
@@ -303,12 +304,20 @@ export class GardenServer {
       // Helper to make JSON messages, make them type-safe, and to log errors.
       const send = <T extends ServerWebsocketMessageType>(type: T, payload: ServerWebsocketMessages[T]) => {
         const event = { type, ...(<object>payload) }
-        this.log.debug(`Send event: ${JSON.stringify(event)}`)
-        websocket.send(JSON.stringify(event), (err) => {
-          if (err) {
-            this.debugLog.debug({ error: toGardenError(err) })
-          }
-        })
+        let parsed: any
+        if (useLocalWsServer) {
+          parsed = hackyParseEvent(event)
+        } else {
+          parsed = event
+        }
+        if (parsed) {
+          this.log.debug(`Send event: ${JSON.stringify(parsed)}`)
+          websocket.send(JSON.stringify(parsed), (err) => {
+            if (err) {
+              this.debugLog.debug({ error: toGardenError(err) })
+            }
+          })
+        }
       }
 
       const error = (message: string, requestId?: string) => {
@@ -361,6 +370,17 @@ export class GardenServer {
       // Respond to commands.
       websocket.on("message", (msg) => {
         let request: any
+
+        if (useLocalWsServer) {
+          const validEvents = ["deployRequested", "buildRequested", "testRequested"]
+          const parsed = JSON.parse(msg.toString())
+          if (validEvents.includes(parsed.event)) {
+            const payload = omit(parsed, "event")
+            this.garden && this.garden.events.emit(parsed.event, payload)
+          }
+
+          return
+        }
 
         this.log.debug("Got request: " + msg)
 
@@ -511,4 +531,24 @@ type ServerWebsocketMessageType = keyof ServerWebsocketMessages
 
 export type ServerWebsocketMessage = ServerWebsocketMessages[ServerWebsocketMessageType] & {
   type: ServerWebsocketMessageType
+}
+
+function hackyParseEvent(event: any) {
+  const validTaskEvents = ["taskComplete", "taskError", "taskPending", "taskProcessing", "taskCancelled"]
+  const validMiscEvents = ["taskStatus", "testStatus", "buildStatus", "serviceStatus", "log", "span", "serviceLog"]
+  const validEventNames = [...validTaskEvents, ...validMiscEvents]
+  const validTaskTypes = ["build", "deploy", "run", "test"]
+  if (!validEventNames.includes(event.name)) {
+    return false
+  }
+
+  if (validTaskEvents.includes(event.name) && !validTaskTypes.includes(event.payload.type)) {
+    return false
+  }
+
+  if (event.name === "serviceLog") {
+    return { name: "serviceLog", type: "serviceLog", ...event.payload }
+  }
+
+  return { ...event.payload, type: event.type, name: event.name }
 }
