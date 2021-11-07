@@ -51,6 +51,7 @@ import { ActionRouter } from "../actions"
 import { PluginEventBroker } from "../plugin-context"
 import { skipEntry } from "./logs"
 import { EventBus } from "../events"
+import { registerCleanupFunction } from "../util/util"
 
 const ansiBannerPath = join(STATIC_DIR, "garden-banner-2.txt")
 const useLocalWsServer = true
@@ -132,9 +133,10 @@ export class DevCommand extends Command<DevCommandArgs, DevCommandOpts> {
     log.info("")
 
     this.server = await startServer({ log: footerLog, port: 9700 })
+    const skipTests = true
     const sessionSettings = prepareSessionSettings({
       deployServiceNames: args.services || ["*"],
-      testModuleNames: opts["skip-tests"] ? [] : ["*"],
+      testModuleNames: skipTests ? [] : ["*"],
       testConfigNames: opts["test-names"] || ["*"],
       devModeServiceNames: args.services || ["*"],
       hotReloadServiceNames: opts["hot-reload"] || [],
@@ -188,9 +190,14 @@ export class DevCommand extends Command<DevCommandArgs, DevCommandOpts> {
       sessionSettings: settings,
     })
 
-    const ws = await wsConnect(garden)
+    let ws: WebSocket | null = null
+    if (useLocalWsServer) {
+      await registerSession(garden)
+    } else {
+      ws = await wsConnect(garden)
+    }
 
-    if (ws) {
+    if (ws || useLocalWsServer) {
       const actions = await garden.getActionRouter()
       startLogStream({ ws, graph, log, actions, events: garden.events })
         .then(() => {
@@ -256,7 +263,7 @@ async function startLogStream({
   actions,
   events,
 }: {
-  ws: WebSocket
+  ws: WebSocket | null
   graph: ConfigGraph
   log: LogEntry
   actions: ActionRouter
@@ -280,7 +287,7 @@ async function startLogStream({
         serviceName: entry.serviceName,
         timestamp: entry.timestamp?.getTime(),
       })
-    } else {
+    } else if (ws) {
       ws.readyState === 1 &&
         ws.send(
           JSON.stringify({
@@ -305,6 +312,14 @@ async function startLogStream({
       events: pluginEvents,
     })
   })
+}
+
+async function registerSession(garden: Garden) {
+  if (!garden.enterpriseApi) {
+    return
+  }
+
+  await garden.enterpriseApi.post("/users/register-core-session", { body: { coreSessionId: garden.sessionId } })
 }
 
 async function wsConnect(garden: Garden) {
@@ -332,7 +347,7 @@ async function wsConnect(garden: Garden) {
   }
 
   garden.events.onAny((name, payload) => {
-    if (ws && ws.readyState === 1 && !useLocalWsServer) {
+    if (ws && ws.readyState === 1) {
       ws.send(JSON.stringify({ type: "event", name, ...payload }))
     }
   })

@@ -249,6 +249,14 @@ export class GardenServer {
       this.debugLog.debug(`Received ${batch.events.length} events from session ${batch.sessionId}`)
       this.debugLog.silly(JSON.stringify(batch.events, null, 2))
 
+      // console.log("receiving events")
+      // console.log(
+      //   batch.events
+      //     .map((e) => e.name)
+      //     .filter((e) => (<any>e).name === "testStatus")
+      //     .join("\n")
+      // )
+
       // Pipe the events to the incoming stream, which websocket listeners will then receive
       batch.events.forEach((e) => this.incomingEvents.emit(e.name, e.payload))
       batch.events.forEach((e) => this.garden!.events.emit(e.name, e.payload))
@@ -289,6 +297,7 @@ export class GardenServer {
   private addWebsocketEndpoint(app: websockify.App) {
     const wsRouter = new Router()
 
+    let lastMessage: null | string = null
     wsRouter.get("/ws", async (ctx) => {
       if (!this.garden) {
         return this.notReady(ctx)
@@ -311,12 +320,25 @@ export class GardenServer {
           parsed = event
         }
         if (parsed) {
-          this.log.debug(`Send event: ${JSON.stringify(parsed)}`)
-          websocket.send(JSON.stringify(parsed), (err) => {
-            if (err) {
-              this.debugLog.debug({ error: toGardenError(err) })
-            }
-          })
+          const stringified = JSON.stringify(parsed)
+          // if (["taskStatus", "testStatus", "buildStatus", "serviceStatus"].includes(parsed.name)) {
+          //   // if (["testStatus"].includes(parsed.name)) {
+          //   console.log(
+          //     `sending event (name=${parsed.name} testName=${parsed.testName}, moduleName=${parsed.moduleName}, pid=${process.pid})`
+          //   )
+          //   // console.log(
+          //   //   `sending task (taskName=${parsed.taskName}, moduleName=${parsed.moduleName}, pid=${process.pid})`
+          //   // )
+          // }
+          if (stringified !== lastMessage) {
+            this.log.debug(`Send event: ${stringified}`)
+            websocket.send(stringified, (err) => {
+              if (err) {
+                this.debugLog.debug({ error: toGardenError(err) })
+              }
+            })
+            lastMessage = stringified
+          }
         }
       }
 
