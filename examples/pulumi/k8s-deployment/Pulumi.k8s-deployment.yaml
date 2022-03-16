@@ -1,5 +1,6 @@
 config:
-  kubernetes:context: docker-desktop
-  pulumi-k8s:appName: api
-  pulumi-k8s:isMinikube: "true"
-  pulumi-k8s:namespace: some-ns
+  'kubernetes:context': docker-desktop
+  'pulumi-k8s:orgName': gordon-garden-bot
+  'pulumi-k8s:appName': api-varfile2-override
+  'pulumi-k8s:isMinikube': 'true'
+  'pulumi-k8s:foo': bar

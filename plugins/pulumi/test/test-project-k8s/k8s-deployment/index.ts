@@ -15,7 +15,8 @@ const config = new pulumi.Config();
 const isMinikube = config.requireBoolean("isMinikube");
 const appName = config.require("appName")
 const orgName = config.require("orgName")
-const namespace = config.require("namespace");
+const stackRef = new pulumi.StackReference(`${orgName}/pulumi-k8s-test/k8s-namespace`)
+const namespace = stackRef.getOutput("namespace")
 
 const appLabels = { app: appName };
 

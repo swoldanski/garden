@@ -1,4 +1,3 @@
 config:
-  kubernetes:context: docker-desktop
-  pulumi-k8s:isMinikube: "true"
-  pulumi-k8s:namespace: some-ns
+  'kubernetes:context': docker-desktop
+  'pulumi-k8s:namespace': pulumi-k8s

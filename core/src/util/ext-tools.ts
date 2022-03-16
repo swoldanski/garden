@@ -118,6 +118,8 @@ export class CliWrapper {
 
   /**
    * Helper for using spawn with live log streaming. Waits for the command to finish before returning.
+   *
+   * If an error occurs and no output has been written to stderr, we use stdout for the error message instead.
    */
   async spawnAndStreamLogs({
     args,
@@ -134,17 +136,17 @@ export class CliWrapper {
     let stdout: string = ""
     let stderr: string = ""
 
-    if (proc.stdout) {
-      proc.stdout.pipe(logStream)
-      proc.stdout.on("data", (data) => {
-        stdout += data
-      })
-    }
-
     if (proc.stderr) {
       proc.stderr.pipe(logStream)
       proc.stderr.on("data", (data) => {
         stderr += data
+      })
+    }
+
+    if (proc.stdout) {
+      proc.stdout.pipe(logStream)
+      proc.stdout.on("data", (data) => {
+        stdout += data
       })
     }
 
@@ -160,8 +162,11 @@ export class CliWrapper {
         if (code === 0) {
           _resolve()
         } else {
+          // Some commands (e.g. the pulumi CLI) don't log anything to stderr when an error occurs. To handle that,
+          // we use `stdout` for the error output instead (in case information relevant to the user is included there).
+          const errOutput = stderr.length > 0 ? stderr : stdout
           reject(
-            new RuntimeError(`${errorPrefix}:\n${stderr}`, {
+            new RuntimeError(`${errorPrefix}:\n${errOutput}`, {
               stdout,
               stderr,
               code,

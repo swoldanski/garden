@@ -1,4 +1,0 @@
-kind: Project
-name: pulumi-test
-providers:
-  - name: pulumi

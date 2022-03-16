@@ -12,7 +12,7 @@ import { PluginCommand, PluginCommandParams } from "@garden-io/sdk/types"
 
 import { PulumiModule, PulumiProvider } from "./config"
 import { Profile } from "@garden-io/core/build/src/util/profiling"
-import { cancelUpdate, getPreviewDirPath, getStackStatus, PulumiParams, refreshResources, reimportStack } from "./helpers"
+import { cancelUpdate, getPreviewDirPath, getStackStatus, PulumiParams, refreshResources, reimportStack, selectStack } from "./helpers"
 import { dedent } from "@garden-io/sdk/util/string"
 import { emptyDir } from "fs-extra"
 
@@ -138,6 +138,7 @@ class PulumiPluginCommandTask extends PluginTask {
       status: "active",
     })
     try {
+      await selectStack(this.pulumiParams)
       await this.runFn(this.pulumiParams)
     } catch (err) {
       log.setError({

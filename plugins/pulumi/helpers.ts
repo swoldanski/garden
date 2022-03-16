@@ -7,19 +7,21 @@
  */
 
 import Bluebird from "bluebird"
+import { safeLoad } from "js-yaml"
 import { flatten, uniq } from "lodash"
 import { merge } from "json-merge-patch"
-import { join } from "path"
-import { ensureDir, readFile } from "fs-extra"
-import { FilesystemError } from "@garden-io/sdk/exceptions"
+import { basename, extname, join, resolve } from "path"
+import { ensureDir, pathExists, readFile } from "fs-extra"
+import { ConfigurationError, FilesystemError } from "@garden-io/sdk/exceptions"
 import { dumpYaml } from "@garden-io/core/build/src/util/util"
 import { DeepPrimitiveMap } from "@garden-io/core/build/src/config/common"
-import { loadAndValidateYaml, loadVarfile } from "@garden-io/core/build/src/config/base"
+import { loadAndValidateYaml } from "@garden-io/core/build/src/config/base"
 import { getPluginOutputsPath } from "@garden-io/sdk"
-import { LogEntry, PluginContext } from "@garden-io/sdk/types"
+import { Garden, LogEntry, PluginContext } from "@garden-io/sdk/types"
 import { defaultPulumiEnv, pulumi } from "./cli"
 import { PulumiModule, PulumiProvider } from "./config"
 import chalk from "chalk"
+import { deline } from "@garden-io/sdk/util/string"
 
 export interface PulumiParams {
   ctx: PluginContext
@@ -60,7 +62,7 @@ export interface PulumiPlan {
 type StackStatus = "up-to-date" | "outdated" | "error"
 
 /**
- * Merges any values in the module's `mergeConfig` with the pulumi stack config, then uses `pulumi preview` to generate
+ * Merges any values in the module's `pulumiVars` and `pulumiVariables`, then uses `pulumi preview` to generate
  * a plan (using the merged config).
  *
  * If the plan only contains `"same"` steps (i.e. no-op steps), we return `"up-to-date"` (and `"outdated"` otherwise).
@@ -112,50 +114,32 @@ export function getModuleStackRoot(module: PulumiModule): string {
   return join(module.path, module.spec.root)
 }
 
-// Helpers that use/manage the `.garden/pulumi.outputs` directory (resolved by `getPluginOutputsPath`).
-//
-// When values from `mergeConfig` are applied to stack config, the resulting merged config for the module is written
-// into the `.garden/pulumi/cache` directory (or `.garden/pulumi/last-preview`, when running
-// `garden plugins pulumi preview` to pre-generate plans and configs for use with the `deployPreview: true` option).
-// These files are then passed to the relevant pulumi CLI commands.
-
 /**
- * Merges any values in the module's `pulumiVariables` (and from any `pulumiVarfiles`) with the
- * pulumi stack config and writes the merged config to the preview or cache directory as appropriate.
- *
- * This merged config can then be passed to e.g. `pulumi preview`.
+ * Merges the module's `pulumiVariables` with any `pulumiVarfiles` and overwrites the module's stack config with the
+ * merged result.
  * 
- * For convenience, returns the path to the merged config file.
+ * For convenience, returns the path to the module's stack config file.
  */
 export async function applyConfig(params: PulumiParams & { previewDirPath?: string }): Promise<string> {
-  const { ctx, module, log, previewDirPath } = params
+  const { ctx, module, log } = params
   await ensureOutputDirs(ctx)
-  const mergedPath = previewDirPath
-    ? join(previewDirPath, getMergedConfigFileName(module, ctx.environmentName))
-    : getMergedConfigFilePath(ctx, module)
-  const stackName = module.spec.stack || module.name
-  const stackConfigPath =join(getModuleStackRoot(module), `Pulumi.${stackName}.yaml`)
-  let fileData: Buffer
+
+  const stackConfigPath = getStackConfigPath(module)
+  let stackConfig: PulumiConfig
   try {
-    fileData = await readFile(stackConfigPath)
+    const fileData = await readFile(stackConfigPath)
+    stackConfig = (await loadAndValidateYaml(fileData.toString(), stackConfigPath))[0]
   } catch (err) {
-    const errMsg = `Could not find pulumi stack configuration file for module ${module.name} at ${stackConfigPath}`
-    throw new FilesystemError(errMsg, {
-      stackConfigPath,
-      moduleName: module.name
-    })
+    log.debug(`No pulumi stack configuration file for module ${module.name} found at ${stackConfigPath}`)
+    stackConfig = { config: {} }
   }
-  const stackConfig: PulumiConfig = (await loadAndValidateYaml(fileData.toString(), stackConfigPath))[0]
   const pulumiVars = module.spec.pulumiVariables
   let varfileContents: DeepPrimitiveMap[]
   try {
     varfileContents = await Bluebird.map(module.spec.pulumiVarfiles, async (varfilePath: string) => {
-      return loadVarfile({
-        configRoot: module.path, 
-        path: varfilePath, 
-        defaultPath: undefined
-      })
+      return loadPulumiVarfile(module, ctx, varfilePath)
     })
+
   } catch (err) {
     throw new FilesystemError(`An error occurred while reading pulumi varfiles for module ${module.name}: ${err.message}`, {
       pulumiVarfiles: module.spec.pulumiVarfiles,
@@ -163,27 +147,23 @@ export async function applyConfig(params: PulumiParams & { previewDirPath?: stri
     })
   }
 
-
   log.debug(`merging config for module ${module.name}`)
-  log.debug(`stack config from ${stackConfigPath}: ${JSON.stringify(stackConfig, null, 2)}`)
   log.debug(`pulumiVariables from module: ${JSON.stringify(pulumiVars, null, 2)}`)
   log.debug(`varfileContents: ${JSON.stringify(varfileContents, null, 2)}`)
 
-  let vars = pulumiVars
   // Pulumi varfiles take precedence over module.spec.pulumiVariables, and are merged in declaration order.
+  let vars = pulumiVars
   for (const varfileVars of varfileContents) {
     vars = <DeepPrimitiveMap>merge(vars, varfileVars)
   }
   log.debug(`merged vars: ${JSON.stringify(vars, null, 2)}`)
-  const mergedConfig: PulumiConfig = {
-    config: <DeepPrimitiveMap>merge(stackConfig.config, vars)
-  }
+  stackConfig.config = vars
 
-  log.debug(`merged config (written to ${mergedPath}): ${JSON.stringify(mergedConfig, null, 2)}`)
+  log.debug(`merged config (written to ${stackConfigPath}): ${JSON.stringify(stackConfig, null, 2)}`)
 
-  await dumpYaml(mergedPath, mergedConfig)
+  await dumpYaml(stackConfigPath, stackConfig)
 
-  return mergedPath
+  return stackConfigPath
 }
 
 export async function getStackStatusFromPlanPath(module: PulumiModule, planPath: string): Promise<StackStatus> {
@@ -211,7 +191,6 @@ export async function getStackStatusFromPlanPath(module: PulumiModule, planPath:
  * Wrapper for `pulumi cancel --yes`. Does not throw on error, since we may also want to cancel other updates upstream.
  */
 export async function cancelUpdate({ module, ctx, provider, log }: PulumiParams): Promise<void> {
-  await selectStack({ module, ctx, provider, log })
   const res = await pulumi(ctx, provider).exec({
     log,
     ignoreError: true,
@@ -231,7 +210,6 @@ export async function cancelUpdate({ module, ctx, provider, log }: PulumiParams)
  */
 export async function refreshResources(params: PulumiParams): Promise<void> {
   const { module, ctx, provider, log } = params
-  await selectStack(params)
   const configPath = await applyConfig(params)
 
   const res = await pulumi(ctx, provider).exec({
@@ -249,7 +227,6 @@ export async function refreshResources(params: PulumiParams): Promise<void> {
  */
 export async function reimportStack(params: PulumiParams): Promise<void> {
   const { module, ctx, provider, log } = params
-  await selectStack(params)
   const cwd = getModuleStackRoot(module)
 
   const cli = pulumi(ctx, provider)
@@ -274,23 +251,31 @@ export async function reimportStack(params: PulumiParams): Promise<void> {
 
 export async function selectStack({ module, ctx, provider, log }: PulumiParams) {
   const root = getModuleStackRoot(module)
-  const stackName = getStackName(module)
-  const args = ["stack", "select", stackName]
+  const stackName = module.spec.stack || module.name
+
+  const orgName = getOrgName(<PulumiProvider>ctx.provider, module)
+  const qualifiedStackName = orgName ? `${orgName}/${stackName}` : stackName
+  const args = ["stack", "select", qualifiedStackName]
   module.spec.createStack && args.push("--create")
   await pulumi(ctx, provider).spawnAndWait({ args, cwd: root, log, env: defaultPulumiEnv })
   return stackName
+}
+
+function getOrgName(provider: PulumiProvider, module: PulumiModule): string | null {
+  if (module.spec.orgName || module.spec.orgName === null) {
+    return module.spec.orgName
+  } else {
+    return provider.config.orgName || null
+  }
 }
 
 export function getPlanPath(ctx: PluginContext, module: PulumiModule): string {
   return join(getPlanDirPath(ctx, module), getPlanFileName(module, ctx.environmentName))
 }
 
-/**
- * Returns the path to the module's last merged Pulumi config file (which contains the base Pulumi config file merged
- * with any config values from the module's `mergeConfig` field).
- */
-export function getMergedConfigFilePath(ctx: PluginContext, module: PulumiModule): string {
-  return join(getPlanDirPath(ctx, module), getMergedConfigFileName(module, ctx.environmentName))
+export function getStackConfigPath(module: PulumiModule): string {
+  const stackName = module.spec.stack || module.name
+  return join(getModuleStackRoot(module), `Pulumi.${stackName}.yaml`)
 }
 
 /**
@@ -321,11 +306,51 @@ export function getPlanFileName(module: PulumiModule, environmentName: string): 
   return `${module.name}.${environmentName}.plan.json`
 }
 
-function getMergedConfigFileName(module: PulumiModule, environmentName: string): string {
-  return `${module.name}.${environmentName}.merged.yaml`
-}
-
 async function ensureOutputDirs(ctx: PluginContext) {
   await ensureDir(getCachePath(ctx))
   await ensureDir(getDefaultPreviewDirPath(ctx))
+}
+
+/**
+ * Reads the YAML-formatted pulumi varfile at `varfilePath`, resolves template strings and returns the parsed contents.
+ */
+async function loadPulumiVarfile(
+  module: PulumiModule,
+  ctx: PluginContext,
+  varfilePath: string
+): Promise<DeepPrimitiveMap> {
+  const resolvedPath = resolve(module.path, varfilePath)
+  if (!(await pathExists(resolvedPath))) {
+    throw new ConfigurationError(`Could not find varfile at path '${resolvedPath}'`, {
+      moduleName: module.name,
+      resolvedPath,
+      varfilePath,
+    })
+  }
+
+  const ext = extname(resolvedPath.toLowerCase())
+  const isYamlFile = ext === ".yml" || ext === ".yaml"
+  if (!isYamlFile) {
+    const errMsg = deline`
+      Unable to load varfile at path ${resolvedPath}: Expected file extension to be .yml or .yaml, got ${ext}. Pulumi varfiles must be YAML files.`
+    throw new ConfigurationError(errMsg, {
+      moduleName: module.name,
+      resolvedPath,
+      varfilePath,
+    })
+  }
+
+  try {
+    const str = (await readFile(resolvedPath)).toString()
+    const resolved = ctx.resolveTemplateStrings(str)
+    const parsed = safeLoad(resolved)
+    return parsed as DeepPrimitiveMap
+  } catch (error) {
+    const errMsg = `Unable to load varfile at '${resolvedPath}': ${error}`
+    throw new ConfigurationError(errMsg, {
+      moduleName: module.name,
+      error,
+      resolvedPath,
+    })
+  }
 }

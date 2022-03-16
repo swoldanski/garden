@@ -13,10 +13,9 @@ import { PluginActionHandlers } from "@garden-io/sdk/types"
 import { ConfigurationError, PluginError } from "@garden-io/sdk/exceptions"
 import {
   applyConfig,
-  getMergedConfigFilePath,
   getModuleStackRoot,
   getPlanPath,
-  getStackName,
+  getStackConfigPath,
   getStackOutputs,
   getStackStatus,
   getStackStatusFromPlanPath,
@@ -85,6 +84,7 @@ export const getPulumiServiceStatus: ServiceActionHandlers["getServiceStatus"] =
     }
   }
 
+  await selectStack(pulumiParams)
   if (deployFromPreview && await getStackStatusFromPlanPath(module, getPlanPath(ctx, module)) === "up-to-date") {
     return {
       state: "ready",
@@ -94,7 +94,6 @@ export const getPulumiServiceStatus: ServiceActionHandlers["getServiceStatus"] =
     }
   }
 
-  await selectStack(pulumiParams)
   const stackStatus = await getStackStatus({ ...pulumiParams, logPreview: false })
 
   const serviceStatus: ServiceStatus = {
@@ -116,6 +115,7 @@ export const deployPulumiService: ServiceActionHandlers["deployService"] = async
   const pulumiModule: PulumiModule = module
   const pulumiParams = { log, ctx, provider, module: pulumiModule }
   const { autoApply, deployFromPreview, cacheStatus } = pulumiModule.spec
+  await selectStack(pulumiParams)
 
   if (!autoApply && !deployFromPreview) {
     log.info(`${pulumiModule.name} has autoApply = false, but no planPath was provided. Skipping deploy.`)
@@ -129,7 +129,6 @@ export const deployPulumiService: ServiceActionHandlers["deployService"] = async
 
   const root = getModuleStackRoot(pulumiModule)
   const env = defaultPulumiEnv
-  await selectStack(pulumiParams)
 
   let planPath: string | null
   if (cacheStatus || deployFromPreview) {
@@ -142,10 +141,8 @@ export const deployPulumiService: ServiceActionHandlers["deployService"] = async
     await applyConfig(pulumiParams)
     planPath = null
   }
-  const mergedConfigPath = getMergedConfigFilePath(ctx, pulumiModule)
-
   log.verbose(`Applying pulumi stack...`)
-  const upArgs = ["up", "--yes",  "--color", "always", "--config-file", mergedConfigPath]
+  const upArgs = ["up", "--yes",  "--color", "always", "--config-file", getStackConfigPath(pulumiModule)]
   planPath && upArgs.push("--plan", planPath)
   await pulumi(ctx, provider).spawnAndStreamLogs({
     args: upArgs,
@@ -182,21 +179,19 @@ export const deletePulumiService: ServiceActionHandlers["deleteService"] = async
   }
   const provider = ctx.provider as PulumiProvider
   const pulumiParams = { log, ctx, provider, module: pulumiModule }
-  const stackName = getStackName(pulumiModule)
   const root = getModuleStackRoot(pulumiModule)
   const env = defaultPulumiEnv
   await selectStack(pulumiParams)
 
   const cli = pulumi(ctx, provider)
-  await cli.spawnAndWait({ args: ["stack", "select", stackName], cwd: root, log, env })
+  await selectStack(pulumiParams)
   log.verbose(`Destroying pulumi stack...`)
-  const mergedConfigPath = getMergedConfigFilePath(ctx, pulumiModule)
   await cli.spawnAndStreamLogs({
     args: [
       "destroy",
       "--yes",
       "--config-file",
-      mergedConfigPath
+      getStackConfigPath(pulumiModule)
     ],
     cwd: root,
     log,
