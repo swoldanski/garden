@@ -251,7 +251,7 @@ On every merge to `master` we also publish an **unstable** release with the vers
 
 The [release script](https://github.com/garden-io/garden/blob/master/scripts/release.ts) has the signature:
 ```sh
-./scripts/release.tsx <minor | patch | preminor | prepatch | prerelease> [--force] [--dry-run]
+./scripts/release.ts <minor | patch | preminor | prepatch | prerelease> [--force] [--dry-run]
 ```
 and does the following:
 
@@ -281,7 +281,7 @@ To make a new release, set your current working directory to the garden root dir
     * On a **Windows** machine, run `garden dev --hot=vote` in the `vote` example project.
         * Change a file in the `vote` service and verify that the hot reload was successful.
         * Open the dashboard, verify that the initial page loads without errors.
-    * On **macOS** or **Linux**, run the `./scripts/test-release <version>` script. The script runs some simple tests to sanity check the release.
+    * On **macOS** or **Linux**, run the `./scripts/test-release.sh <version>` script. The script runs some simple tests to sanity check the release.
 5. Go to our Github [Releases page](https://github.com/garden-io/garden/releases) and click the **Edit** button for the draft just created from CI. Note that for drafts, a new one is always created instead of replacing a previous one.
 6. Write release notes. The notes should give an overview of the release and mention all relevant features. They should also **acknowledge all external contributors** and contain the changelog for that release.
     * To generate a changelog for just that tag, run `git-chglog <tag-name>`
