@@ -287,6 +287,7 @@ To make a new release, set your current working directory to the garden root dir
 6. Write release notes. The notes should give an overview of the release and mention all relevant features. They should also **acknowledge all external contributors** and contain the changelog for that release.
     * To generate a changelog for just that tag, run `git-chglog <tag-name>`
     * To get a list of all contributors between releases, ordered by count, run: `git log <previous-tag>..<current-tag> --no-merges "$@" | grep ^Author | sort | uniq -c | sort -nr`. Note that authors of squashed commits won't show up so it might be good to do a quick sanity check on Github as well.
+    * Remember to put the list of features on top of the list of bug fixes.
 7. Click the **Publish release** button.
 8. Make a pull request for the branch that was pushed by the script.
 9. Make sure the `latest-release` branch contains the released version, and push it to the remote. **This branch is used for our documentation, so this step is important.**
