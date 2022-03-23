@@ -278,7 +278,8 @@ To make a new release, set your current working directory to the garden root dir
         3. Run `./scripts/release.ts minor | patch`. This way, the version bump commits and changelog entries created by the pre-releases are omitted from the final history.
 3. If you're making a pre-release you're done, and you can now start testing the binaries that were just published to our Github [Releases page](https://github.com/garden-io/garden/releases) (**step 4**). Otherwise go to **step 5**.
 4. Manual testing (using the pre-release/release binary)
-    * On a **Windows** machine, run `garden dev --hot=vote` in the `vote` example project.
+    * On a **Windows** machine, run `garden deploy --dev vote --env remote` in the `vote` example project.
+        * If there are any issues with syncing, consider changing the `services[].devMode.sync[].mode` value(s) to `one-way-replica` and restart the Garden.
         * Change a file in the `vote` service and verify that the hot reload was successful.
         * Open the dashboard, verify that the initial page loads without errors.
     * On **macOS** or **Linux**, run the `./scripts/test-release.sh <version>` script. The script runs some simple tests to sanity check the release.
